@@ -27,7 +27,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: abhilitcode/term-deposit-forecasting-in-direct-marketing:latest
+        tags: abhilitcode/app:latest
         builder: default
         registry: docker.io
         username: ${{ secrets.DOCKER_USERNAME }}
