@@ -1,9 +1,3 @@
-# Term-Deposit-Forecasting-in-Direct-Marketing
-
-Here's a README file for your GitHub project, "Term Deposit Forecasting in Direct Marketing":
-
----
-
 # Term Deposit Forecasting in Direct Marketing
 
 ## Project Overview
