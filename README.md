@@ -67,19 +67,17 @@ The final model achieved an accuracy of 89% using XGBoost. The model was deploye
 ## Repository Structure
 
 ```plaintext
-├── data
-│   ├── bank-full.csv
-├── notebooks
-│   ├── EDA.ipynb
-│   ├── Model_Development.ipynb
-├── src
-│   ├── preprocess.py
-│   ├── model.py
-├── app
-│   ├── streamlit_app.py
+├── .github
 ├── Dockerfile
+├── README.md
+├── Term Deposit Forecasting in Direct Marketing.ipynb
+├── app.py
+├── bank-additional-full.csv
+├── data_description.py
+├── feature_dict.json
 ├── requirements.txt
-└── README.md
+└── xgboost_model
+
 ```
 
 ## How to Run
