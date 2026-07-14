@@ -3,6 +3,12 @@ import pandas as pd
 import joblib
 import json
 
+st.set_page_config(
+    page_title="Term Deposit Prediction",
+    page_icon="💰",
+    layout="wide"
+)
+
 best_model = joblib.load('xgboostt_model.joblib')
 
 # Load the feature dictionary
@@ -10,6 +16,25 @@ with open('feature_dict.json', 'r') as fp:
     feature_dict = json.load(fp)
 
 st.title("Term Deposit Forecasting in Direct Marketing")
+
+st.sidebar.title("About")
+
+st.sidebar.info(
+"""
+Model : XGBoost
+
+Sampling : Over Sampling
+
+Hyperparameter Tuning : RandomizedSearchCV
+
+Evaluation :
+- Precision
+- Recall
+- F1 Score
+- ROC-AUC
+- Precision-Recall Curve
+"""
+)
 
 #1
 age = st.number_input('Age',min_value=0,max_value=120,step=1,format='%d')
@@ -87,7 +112,8 @@ if day != "Select last contact day of the week":
 else:
     st.write("Please select the day from dropdown.")
 #11
-duration = st.number_input("Duration of Last Contact (seconds)", min_value=0, step=1)
+# duration = st.number_input("Duration of Last Contact (seconds)", min_value=0, step=1)
+
 #12
 campaign = st.number_input("Number of Contacts Performed During This Campaign", min_value=0, step=1)
 #13
@@ -123,78 +149,100 @@ nr_employed = st.number_input("Number of Employees")
 
 #21
 if st.button("Make Predictions"):
-    input_data = pd.DataFrame({
-        'age': [age],
-        'job': [job],
-        'marital': [marital],
-        'education': [education_level],
-        'default': [default],
-        'housing': [housing],
-        'loan': [personal],
-        'contact': [contact],
-        'month': [month],
-        'day_of_week': [day],
-        'duration': [duration],
-        'campaign': [campaign],
-        'pdays': [pdays],
-        'previous': [previous],
-        'poutcome': [poutcome],
-        'emp.var.rate': [emp_var_rate],
-        'cons.price.idx': [cons_price_idx],
-        'cons.conf.idx': [cons_conf_idx],
-        'euribor3m': [euribor3m],
-        'nr.employed': [nr_employed],
-    })
-    
-    numerical_data = input_data.select_dtypes(include='number')
-    numerical_features = numerical_data.columns.to_list()
+    #bcuz they are placeholders we need to create validation for them to avoid returning prediction when 
+    #they are not selected.
+    if (
+        job == "Select a Job" or
+        education_level == "Select your education level" or
+        contact == "Select your contact" or
+        month == "Select last contact month of year" or
+        day == "Select last contact day of the week" or
+        poutcome == "Select your previous outcome"
+    ):
+        st.error("⚠ Please fill all the required fields before making a prediction.")
 
-    categorical_data = input_data.select_dtypes(exclude='number')
-    categorical_features = categorical_data.columns.to_list()
-    
-
-    X_test = {}
-    
-    # add numerical columns in X_test
-    for col in numerical_features:
-        X_test[col] = input_data[col].iloc[0]
-    
-    # add categorical columns in X_test
-    for i in feature_dict:
-        for j in feature_dict[i]:
-            if input_data[i].iloc[0] == j:
-                X_test[f'{i}_{j}'] = [1]
-            else:
-                X_test[f'{i}_{j}'] = [0]
-
-    X_test_df = pd.DataFrame.from_dict(X_test)
-    print(X_test_df.columns)
-    print(X_test)
-    X_test_df = X_test_df[['age', 'duration', 'campaign', 'pdays', 'previous', 'emp.var.rate',
-       'cons.price.idx', 'cons.conf.idx', 'euribor3m', 'nr.employed',
-       'job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid',
-       'job_management', 'job_retired', 'job_self-employed', 'job_services',
-       'job_student', 'job_technician', 'job_unemployed', 'job_unknown',
-       'marital_divorced', 'marital_married', 'marital_single',
-       'marital_unknown', 'education_basic.4y', 'education_basic.6y',
-       'education_basic.9y', 'education_high.school', 'education_illiterate',
-       'education_professional.course', 'education_university.degree',
-       'education_unknown', 'default_no', 'default_unknown', 'default_yes',
-       'housing_no', 'housing_unknown', 'housing_yes', 'loan_no',
-       'loan_unknown', 'loan_yes', 'contact_cellular', 'contact_telephone',
-       'month_apr', 'month_aug', 'month_dec', 'month_jul', 'month_jun',
-       'month_mar', 'month_may', 'month_nov', 'month_oct', 'month_sep',
-       'day_of_week_fri', 'day_of_week_mon', 'day_of_week_thu',
-       'day_of_week_tue', 'day_of_week_wed', 'poutcome_failure',
-       'poutcome_nonexistent', 'poutcome_success']]
-    
-# dont do drop_first in training
-    predictions = best_model.predict(X_test_df)
-    # st.write("Term Deposit")
-    if predictions[0] == 0:
-        st.write('No Term Deposit')
     else:
-        st.write("Term Deposit")
+        input_data = pd.DataFrame({
+            'age': [age],
+            'job': [job],
+            'marital': [marital],
+            'education': [education_level],
+            'default': [default],
+            'housing': [housing],
+            'loan': [personal],
+            'contact': [contact],
+            'month': [month],
+            'day_of_week': [day],
+            # 'duration': [duration],
+            'campaign': [campaign],
+            'pdays': [pdays],
+            'previous': [previous],
+            'poutcome': [poutcome],
+            'emp.var.rate': [emp_var_rate],
+            'cons.price.idx': [cons_price_idx],
+            'cons.conf.idx': [cons_conf_idx],
+            'euribor3m': [euribor3m],
+            'nr.employed': [nr_employed],
+        })
+        
+        numerical_data = input_data.select_dtypes(include='number')
+        numerical_features = numerical_data.columns.to_list()
+
+        categorical_data = input_data.select_dtypes(exclude='number')
+        categorical_features = categorical_data.columns.to_list()
+        
+
+        X_test = {}
+        
+        # add numerical columns in X_test
+        for col in numerical_features:
+            X_test[col] = input_data[col].iloc[0]
+        
+        # add categorical columns in X_test
+        for i in feature_dict:
+            for j in feature_dict[i]:
+                if input_data[i].iloc[0] == j:
+                    X_test[f'{i}_{j}'] = [1]
+                else:
+                    X_test[f'{i}_{j}'] = [0]
+
+        X_test_df = pd.DataFrame.from_dict(X_test)
+        # print(X_test_df.columns)
+        # print(X_test)
+        X_test_df = X_test_df[['age', 'campaign', 'pdays', 'previous', 'emp.var.rate',
+        'cons.price.idx', 'cons.conf.idx', 'euribor3m', 'nr.employed',
+        'job_admin.', 'job_blue-collar', 'job_entrepreneur', 'job_housemaid',
+        'job_management', 'job_retired', 'job_self-employed', 'job_services',
+        'job_student', 'job_technician', 'job_unemployed', 'job_unknown',
+        'marital_divorced', 'marital_married', 'marital_single',
+        'marital_unknown', 'education_basic.4y', 'education_basic.6y',
+        'education_basic.9y', 'education_high.school', 'education_illiterate',
+        'education_professional.course', 'education_university.degree',
+        'education_unknown', 'default_no', 'default_unknown', 'default_yes',
+        'housing_no', 'housing_unknown', 'housing_yes', 'loan_no',
+        'loan_unknown', 'loan_yes', 'contact_cellular', 'contact_telephone',
+        'month_apr', 'month_aug', 'month_dec', 'month_jul', 'month_jun',
+        'month_mar', 'month_may', 'month_nov', 'month_oct', 'month_sep',
+        'day_of_week_fri', 'day_of_week_mon', 'day_of_week_thu',
+        'day_of_week_tue', 'day_of_week_wed', 'poutcome_failure',
+        'poutcome_nonexistent', 'poutcome_success']]
+        
+    # dont do drop_first in training
+        predictions = best_model.predict(X_test_df)
+
+        probability = best_model.predict_proba(X_test_df)
+
+        subscription_probability = probability[0][1] #this is array[[0th val, 1st val]] 0-> no term, 1-> term deposit
+
+        st.subheader("Prediction Result")
+
+        if predictions[0] == 0:
+            st.error("❌ Customer is NOT likely to subscribe to the Term Deposit.")
+        else:
+            st.success("✅ Customer is likely to subscribe to the Term Deposit.")
+
+        st.write(f"### Probability of Subscription : {subscription_probability:.2%}")
+
 
 
 
